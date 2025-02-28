@@ -146,6 +146,10 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 			throw hyperapi_response;
 		}
 
+		if (hyperapi_response instanceof Response) {
+			return hyperapi_response;
+		}
+
 		return new Response(
 			isResponseBodyRequired(http_method)
 				? JSON.stringify(hyperapi_response)

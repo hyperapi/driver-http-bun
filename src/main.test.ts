@@ -107,6 +107,27 @@ describe('args', () => {
 				message: 'Hello, baz!',
 			});
 		});
+
+		test('response', async () => {
+			const response = await fetch(
+				'http://localhost:18001/api/echo-response',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						name: 'foo',
+					}),
+				},
+			);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get('Content-Type')).toBe('text/plain');
+
+			const body = await response.text();
+			expect(body).toEqual('Hello, foo!');
+		});
 	});
 });
 
