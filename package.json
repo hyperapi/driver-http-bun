@@ -18,7 +18,7 @@
 		"node": ">=21"
 	},
 	"dependencies": {
-		"@hyperapi/core": "^0.3.0-beta.3",
+		"@hyperapi/core": "git+https://github.com/hyperapi/core#bf5d1ce6857b026fdda5ad219d232acac8008e7d",
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
