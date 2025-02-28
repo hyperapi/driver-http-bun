@@ -90,6 +90,9 @@ export class HyperAPIBunDriver {
         if (hyperapi_response instanceof HyperAPIError) {
             throw hyperapi_response;
         }
+        if (hyperapi_response instanceof Response) {
+            return hyperapi_response;
+        }
         return new Response(isResponseBodyRequired(http_method)
             ? JSON.stringify(hyperapi_response)
             : undefined, {

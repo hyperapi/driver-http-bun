@@ -11,6 +11,6 @@ export default function (request: HyperAPIBunRequest<{ name: string }>): HyperAP
 			headers: {
 				'Content-Type': 'text/plain',
 			},
-		}
+		},
 	);
 }

@@ -18,7 +18,7 @@
 		"node": ">=21"
 	},
 	"dependencies": {
-		"@hyperapi/core": "git+https://github.com/hyperapi/core#bf5d1ce6857b026fdda5ad219d232acac8008e7d",
+		"@hyperapi/core": "git+https://github.com/hyperapi/core#d8b753edc246919be9b2f026a78013335c71d310",
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
@@ -29,7 +29,8 @@
 	},
 	"scripts": {
 		"build": "bun run build:ts && bun run build:cjs",
-		"build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs src/main.ts",
+		"build:cjs": "bun build dist/esm/main.js --platform=node --format=cjs --packages=external --outfile=dist/main.cjs",
+		"# build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs dist/esm/main.js",
 		"build:ts": "rm -rf dist/esm dist/types ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"publish:npm": "bun run build && bun run lint && bun run test && npm publish",
