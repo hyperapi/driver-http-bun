@@ -1,6 +1,6 @@
 {
 	"name": "@hyperapi/driver-bun",
-	"version": "0.3.0-beta.3",
+	"version": "0.3.0-dev",
 	"description": "HyperAPI HTTP driver for Bun.",
 	"publishConfig": {
 		"access": "public"
