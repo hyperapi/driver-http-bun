@@ -18,8 +18,10 @@
 		"node": ">=21"
 	},
 	"dependencies": {
-		"@hyperapi/core": "git+https://github.com/hyperapi/core#d8b753edc246919be9b2f026a78013335c71d310",
 		"@kirick/ip": "^0.1.1"
+	},
+	"peerDependencies": {
+		"@hyperapi/core": "github:hyperapi/core#ca15b2c93608f45161267612ddc473dbe55d61f0"
 	},
 	"devDependencies": {
 		"@kirick/eslint-config": "^0.1.30",
