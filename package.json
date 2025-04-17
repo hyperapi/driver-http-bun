@@ -32,8 +32,8 @@
 		"build:cjs": "bun build dist/esm/main.js --platform=node --format=cjs --packages=external --outfile=dist/main.cjs",
 		"# build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs dist/esm/main.js",
 		"build:ts": "rm -rf dist/esm dist/types ; tsc",
+		"check": "bun run build && bun run lint && bun run test",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
-		"publish:npm": "bun run build && bun run lint && bun run test && npm publish",
 		"test": "bun test --coverage"
 	},
 	"repository": {

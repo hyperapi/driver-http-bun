@@ -1,5 +1,5 @@
 import { type HyperAPIDriver, type HyperAPIDriverHandler } from '@hyperapi/core';
-import { type HyperAPIBunRequest } from './request.js';
+import type { HyperAPIBunRequest } from './request.js';
 interface Config {
     port: number;
     path?: string;
@@ -33,4 +33,4 @@ export declare class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequ
      */
     private processRequest;
 }
-export { type HyperAPIBunRequest } from './request.js';
+export type { HyperAPIBunRequest } from './request.js';

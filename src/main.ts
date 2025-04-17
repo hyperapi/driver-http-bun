@@ -1,4 +1,4 @@
-import { type Server } from 'bun';
+import type { Server } from 'bun';
 import {
 	HyperAPIError,
 	type HyperAPIDriver,
@@ -6,7 +6,7 @@ import {
 } from '@hyperapi/core';
 import { IP } from '@kirick/ip';
 import { parseArguments } from './utils/parse.js';
-import { type HyperAPIBunRequest } from './request.js';
+import type { HyperAPIBunRequest } from './request.js';
 import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
 import {
 	isHttpMethodSupported,
@@ -164,4 +164,4 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 	}
 }
 
-export { type HyperAPIBunRequest } from './request.js';
+export type { HyperAPIBunRequest } from './request.js';
