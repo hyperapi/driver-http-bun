@@ -6,13 +6,10 @@
 		"access": "public"
 	},
 	"type": "module",
-	"main": "dist/esm/main.js",
-	"types": "dist/esm/main.d.ts",
+	"main": "dist/main.js",
+	"types": "dist/main.d.ts",
 	"exports": {
-		".": {
-			"import": "./dist/esm/main.js",
-			"require": "./dist/main.cjs"
-		}
+		".": "./dist/main.js"
 	},
 	"engines": {
 		"node": ">=21"
@@ -21,21 +18,23 @@
 		"@kirick/ip": "^0.1.1"
 	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#ca15b2c93608f45161267612ddc473dbe55d61f0"
+		"@hyperapi/core": "github:hyperapi/core#8894dcfe65392c9a4111c4494945817bff9f1f52"
 	},
 	"devDependencies": {
 		"@kirick/eslint-config": "^0.1.30",
-		"@types/bun": "^1.1.8",
+		"@types/bun": "^1.2.13",
 		"eslint": "9.10.0",
-		"typescript": "5.5.4"
+		"oxc-parser": "0.71.0",
+		"publint": "0.3.12",
+		"tsdown": "0.12.2",
+		"typescript": "5.8.3",
+		"unplugin-unused": "0.5.0",
+		"vitest": "3.1.4"
 	},
 	"scripts": {
-		"build": "bun run build:ts && bun run build:cjs",
-		"build:cjs": "bun build dist/esm/main.js --platform=node --format=cjs --packages=external --outfile=dist/main.cjs",
-		"# build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs dist/esm/main.js",
-		"build:ts": "rm -rf dist/esm dist/types ; tsc",
+		"build": "tsdown src/main.ts --publint --unused --dts --format esm",
 		"check": "bun run build && bun run lint && bun run test",
-		"lint": "eslint . && tsc --skipLibCheck --noemit",
+		"lint": "eslint . && tsc",
 		"test": "bun test --coverage"
 	},
 	"repository": {

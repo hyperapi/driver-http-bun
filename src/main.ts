@@ -48,7 +48,7 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 	 * Starts the server.
 	 * @param handler - The handler to use.
 	 */
-	start(handler: HyperAPIDriverHandler<HyperAPIBunRequest>) {
+	start(handler: HyperAPIDriverHandler<HyperAPIBunRequest>): void {
 		this.handler = handler;
 		this.server = Bun.serve({
 			development: false,
@@ -80,7 +80,7 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 	}
 
 	/** Stops the server. */
-	stop() {
+	stop(): void {
 		this.server?.stop();
 	}
 

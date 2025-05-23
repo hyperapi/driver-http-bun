@@ -18,10 +18,10 @@ function getMIME(type: string): string {
 type RequestArgs = Record<string, unknown>;
 
 class HyperAPIBodyInvalidError extends HyperAPIInvalidParametersError<{ message: string }> {
-	data = {
+	override data = {
 		message: 'Could not parse body',
 	};
-	httpStatus = 400;
+	override httpStatus = 400;
 
 	constructor(message?: string) {
 		super();
@@ -33,10 +33,10 @@ class HyperAPIBodyInvalidError extends HyperAPIInvalidParametersError<{ message:
 }
 
 class HyperAPIBodyUnknownError extends HyperAPIInvalidParametersError<{ message: string }> {
-	data = {
+	override data = {
 		message: 'Unsupported body type',
 	};
-	httpStatus = 415;
+	override httpStatus = 415;
 
 	constructor(mime: string) {
 		super();
