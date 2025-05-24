@@ -14,11 +14,9 @@
 	"engines": {
 		"node": ">=21"
 	},
-	"dependencies": {
-		"@kirick/ip": "^0.1.1"
-	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#8894dcfe65392c9a4111c4494945817bff9f1f52"
+		"@hyperapi/core": "github:hyperapi/core#8894dcfe65392c9a4111c4494945817bff9f1f52",
+		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
 		"@kirick/eslint-config": "^0.1.30",
