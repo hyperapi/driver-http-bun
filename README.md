@@ -17,7 +17,7 @@ This driver connects your HyperAPI application to HTTP clients using Bun's built
 ## Installation
 
 ```bash
-bun i @hyperapi/core @hyperapi/driver-http-bun @kirick/ip
+bun i @hyperapi/core @hyperapi/driver-bun @kirick/ip
 ```
 
 ## Quick Start
@@ -26,7 +26,7 @@ bun i @hyperapi/core @hyperapi/driver-http-bun @kirick/ip
 
 ```typescript
 import { HyperAPI } from '@hyperapi/core';
-import { HyperAPIBunDriver } from '@hyperapi/driver-http-bun';
+import { HyperAPIBunDriver } from '@hyperapi/driver-bun';
 
 // Create a driver instance
 const driver = new HyperAPIBunDriver({
@@ -51,7 +51,7 @@ Example endpoint (`hyper-api/hello.[get].ts`):
 
 ```typescript
 import type { HyperAPIResponse } from '@hyperapi/core';
-import type { HyperAPIBunRequest } from '@hyperapi/driver-http-bun';
+import type { HyperAPIBunRequest } from '@hyperapi/driver-bun';
 import * as v from 'valibot';
 
 // Define your handler function
