@@ -4,6 +4,6 @@ import type { IP }              from '@kirick/ip';
 export interface HyperAPIBunRequest<A extends Record<string, unknown> = Omit<{ p: unknown }, 'p'>> extends HyperAPIRequest<A> {
 	// request: Request;
 	url: URL;
-	headers: Record<string, unknown>;
+	headers: Headers;
 	ip: IP;
 }

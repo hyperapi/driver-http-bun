@@ -7,5 +7,6 @@ export default function (request: HyperAPIBunRequest<{ name: string }>): HyperAP
 	return {
 		method: 'ALL',
 		message: `Hello, ${request.args.name}!`,
+		header_value: request.headers.get('x-test-header'),
 	};
 }

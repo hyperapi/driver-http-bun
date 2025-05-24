@@ -138,7 +138,7 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 			path: hyperapi_method,
 			args: hyperapi_args,
 			url: url as URL,
-			headers: Object.fromEntries(request.headers),
+			headers: request.headers,
 			ip: new IP(socket_address.address),
 		});
 
