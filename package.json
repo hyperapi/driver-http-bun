@@ -15,14 +15,13 @@
 		"node": ">=21"
 	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#200cfe5c666ee72caad8208a4c954de6cc83de19",
+		"@hyperapi/core": "github:hyperapi/core#30dc86f06f4960f43a17b5cb63b6bd57740ad8be",
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
 		"@kirick/eslint-config": "^0.1.30",
 		"@types/bun": "^1.2.13",
 		"eslint": "9.10.0",
-		"oxc-parser": "0.71.0",
 		"publint": "0.3.12",
 		"tsdown": "0.12.2",
 		"typescript": "5.8.3",
