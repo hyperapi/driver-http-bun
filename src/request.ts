@@ -1,7 +1,8 @@
 import type { HyperAPIRequest } from '@hyperapi/core';
-import type { IP }              from '@kirick/ip';
+import type { IP } from '@kirick/ip';
+import type { EmptyObject } from 'type-fest';
 
-export interface HyperAPIBunRequest<A extends Record<string, unknown> = Omit<{ p: unknown }, 'p'>> extends HyperAPIRequest<A> {
+export interface HyperAPIBunRequest<A extends Record<string, unknown> = EmptyObject> extends HyperAPIRequest<A> {
 	// request: Request;
 	url: URL;
 	headers: Headers;

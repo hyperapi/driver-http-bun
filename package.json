@@ -24,6 +24,7 @@
 		"eslint": "9.10.0",
 		"publint": "0.3.12",
 		"tsdown": "0.12.2",
+		"type-fest": "^4.41.0",
 		"typescript": "5.8.3",
 		"unplugin-unused": "0.5.0",
 		"vitest": "3.1.4"
