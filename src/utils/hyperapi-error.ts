@@ -12,7 +12,7 @@ export function hyperApiErrorToResponse(
 	add_body: boolean,
 ): Response {
 	if (typeof error.httpStatus !== 'number') {
-		// eslint-disable-next-line no-console
+		// oxlint-disable-next-line no-console
 		console.warn(
 			`No HTTP status code provided for error ${error.name}, using 500.`,
 		);

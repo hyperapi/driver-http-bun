@@ -63,9 +63,9 @@ export class HyperAPIBunDriver
 						);
 					}
 
-					// eslint-disable-next-line no-console
+					// oxlint-disable-next-line no-console
 					console.error('Unhandled error in @hyperapi/driver-bun:');
-					// eslint-disable-next-line no-console
+					// oxlint-disable-next-line no-console
 					console.error(error);
 
 					return new Response(undefined, { status: 500 });
