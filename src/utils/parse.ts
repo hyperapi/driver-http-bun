@@ -17,7 +17,9 @@ function getMIME(type: string): string {
 
 type RequestArgs = Record<string, unknown>;
 
-class HyperAPIBodyInvalidError extends HyperAPIInvalidParametersError<{ message: string }> {
+class HyperAPIBodyInvalidError extends HyperAPIInvalidParametersError<{
+	message: string;
+}> {
 	override data = {
 		message: 'Could not parse body',
 	};
@@ -32,7 +34,9 @@ class HyperAPIBodyInvalidError extends HyperAPIInvalidParametersError<{ message:
 	}
 }
 
-class HyperAPIBodyUnknownError extends HyperAPIInvalidParametersError<{ message: string }> {
+class HyperAPIBodyUnknownError extends HyperAPIInvalidParametersError<{
+	message: string;
+}> {
 	override data = {
 		message: 'Unsupported body type',
 	};
@@ -58,36 +62,32 @@ export async function parseArguments(
 ): Promise<RequestArgs> {
 	let args: RequestArgs = {};
 
-	if (
-		request.method === 'GET'
-		|| request.method === 'HEAD'
-	) {
-		args = Object.fromEntries(
-			url.searchParams.entries(),
-		);
-	}
-	else if (request.body) {
+	if (request.method === 'GET' || request.method === 'HEAD') {
+		args = Object.fromEntries(url.searchParams.entries());
+	} else if (request.body) {
 		const type_header = request.headers.get('Content-Type');
-		const type_mime = type_header === null
-			? '<no Content-Type header provided>'
-			: getMIME(type_header);
+		const type_mime =
+			type_header === null
+				? '<no Content-Type header provided>'
+				: getMIME(type_header);
 
 		switch (type_mime) {
-			case 'application/json': {
-				let args_json: unknown;
-				try {
-					args_json = await request.json();
-				}
-				catch {
-					throw new HyperAPIBodyInvalidError();
-				}
+			case 'application/json':
+				{
+					let args_json: unknown;
+					try {
+						args_json = await request.json();
+					} catch {
+						throw new HyperAPIBodyInvalidError();
+					}
 
-				if (isRecord(args_json) !== true) {
-					throw new HyperAPIBodyInvalidError('JSON body must be an object');
-				}
+					if (isRecord(args_json) !== true) {
+						throw new HyperAPIBodyInvalidError('JSON body must be an object');
+					}
 
-				args = args_json;
-			} break;
+					args = args_json;
+				}
+				break;
 
 			case 'multipart/form-data':
 				if (multipart_formdata_enabled !== true) {
@@ -96,24 +96,16 @@ export async function parseArguments(
 
 				try {
 					const formdata = await request.formData();
-					args = Object.fromEntries(
-						formdata.entries(),
-					);
-				}
-				catch {
+					args = Object.fromEntries(formdata.entries());
+				} catch {
 					throw new HyperAPIInvalidParametersError();
 				}
 				break;
 
 			case 'application/x-www-form-urlencoded':
 				try {
-					args = Object.fromEntries(
-						new URLSearchParams(
-							await request.text(),
-						),
-					);
-				}
-				catch {
+					args = Object.fromEntries(new URLSearchParams(await request.text()));
+				} catch {
 					throw new HyperAPIInvalidParametersError();
 				}
 				break;

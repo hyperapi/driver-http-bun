@@ -4,12 +4,10 @@ import { EmptyObject } from "type-fest";
 
 //#region src/request.d.ts
 interface HyperAPIBunRequest<A extends Record<string, unknown> = EmptyObject> extends HyperAPIRequest<A> {
-  // request: Request;
   url: URL;
   headers: Headers;
   ip: IP;
 }
-
 //#endregion
 //#region src/main.d.ts
 interface Config {
@@ -17,9 +15,7 @@ interface Config {
   path?: string;
   multipart_formdata_enabled?: boolean;
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handler;
   private port;
   private path;
@@ -50,5 +46,6 @@ declare class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any
   * @returns -
   */
   private processRequest;
-} //#endregion
-export { HyperAPIBunDriver, HyperAPIBunRequest };
+}
+//#endregion
+export { HyperAPIBunDriver, type HyperAPIBunRequest };

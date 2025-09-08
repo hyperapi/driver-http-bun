@@ -1,17 +1,14 @@
-import type { Server } from 'bun';
 import {
-	HyperAPIError,
 	type HyperAPIDriver,
 	type HyperAPIDriverHandler,
+	HyperAPIError,
 } from '@hyperapi/core';
 import { IP } from '@kirick/ip';
-import { parseArguments } from './utils/parse.js';
+import type { Server } from 'bun';
 import type { HyperAPIBunRequest } from './request.js';
+import { isHttpMethodSupported, isResponseBodyRequired } from './utils/http.js';
 import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
-import {
-	isHttpMethodSupported,
-	isResponseBodyRequired,
-} from './utils/http.js';
+import { parseArguments } from './utils/parse.js';
 
 interface Config {
 	port: number;
@@ -19,8 +16,10 @@ interface Config {
 	multipart_formdata_enabled?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>> {
+export class HyperAPIBunDriver
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	implements HyperAPIDriver<HyperAPIBunRequest<any>>
+{
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private handler: HyperAPIDriverHandler<HyperAPIBunRequest<any>> | null = null;
 	private port: number;
@@ -56,8 +55,7 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 			fetch: async (request, server) => {
 				try {
 					return await this.processRequest(request, server);
-				}
-				catch (error) {
+				} catch (error) {
 					if (error instanceof HyperAPIError) {
 						return hyperApiErrorToResponse(
 							error,
@@ -70,10 +68,7 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 					// eslint-disable-next-line no-console
 					console.error(error);
 
-					return new Response(
-						undefined,
-						{ status: 500 },
-					);
+					return new Response(undefined, { status: 500 });
 				}
 			},
 		});
@@ -106,23 +101,15 @@ export class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>
 
 		const http_method = request.method;
 		if (isHttpMethodSupported(http_method) !== true) {
-			return new Response(
-				undefined,
-				{ status: 405 },
-			);
+			return new Response(undefined, { status: 405 });
 		}
 
 		const url = new URL(request.url);
 		if (url.pathname.startsWith(this.path) !== true) {
-			return new Response(
-				undefined,
-				{ status: 404 },
-			);
+			return new Response(undefined, { status: 404 });
 		}
 
-		const hyperapi_method = url.pathname.slice(
-			this.path.length,
-		);
+		const hyperapi_method = url.pathname.slice(this.path.length);
 
 		const hyperapi_args = await parseArguments(
 			request,

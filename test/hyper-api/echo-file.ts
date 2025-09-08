@@ -3,7 +3,9 @@
 import { type HyperAPIResponse } from '@hyperapi/core';
 import { type HyperAPIBunRequest } from '../../src/main.js';
 
-export default async function (request: HyperAPIBunRequest<{ name: Blob }>): Promise<HyperAPIResponse> {
+export default async function (
+	request: HyperAPIBunRequest<{ name: Blob }>,
+): Promise<HyperAPIResponse> {
 	const name = await request.args.name.text();
 
 	return {
