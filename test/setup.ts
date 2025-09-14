@@ -1,4 +1,4 @@
-import { HyperAPI } from '@hyperapi/core';
+import { HyperAPI, HyperAPIInvalidParametersError } from '@hyperapi/core';
 import type { HyperAPIRequest } from '@hyperapi/core/dev';
 import * as v from 'valibot';
 import { HyperAPIBunDriver } from '../src/main.js';
@@ -23,6 +23,11 @@ export const hyperApiMultipart = new HyperAPI(
 // eslint-disable-next-line jsdoc/require-jsdoc, @typescript-eslint/no-explicit-any
 export function valibot<S extends v.BaseSchema<any, any, any>>(schema: S) {
 	return (request: HyperAPIRequest) => {
-		return { args: v.parse(schema, request.args) };
+		const result = v.safeParse(schema, request.args);
+		if (result.success) {
+			return { args: result.output };
+		}
+
+		throw new HyperAPIInvalidParametersError();
 	};
 }
