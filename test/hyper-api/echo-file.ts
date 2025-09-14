@@ -3,9 +3,9 @@ import { hyperApi, valibot } from '../setup.js';
 
 export default hyperApi
 	.module()
-	.use(valibot(v.object({ name: v.file() })))
+	.use(valibot(v.object({ file: v.file() })))
 	.action(async (request) => {
-		const name = await request.args.name.text();
+		const name = await request.args.file.text();
 
 		return {
 			method: 'ALL',

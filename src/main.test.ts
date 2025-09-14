@@ -77,7 +77,7 @@ describe('args', () => {
 
 		test('multipart', async () => {
 			const form_data = new FormData();
-			form_data.append('name', new Blob(['baz'], { type: 'text/plain' }));
+			form_data.append('file', new Blob(['baz'], { type: 'text/plain' }));
 
 			const response = await fetch('http://localhost:18002/api/echo-file', {
 				method: 'POST',
