@@ -1,8 +1,5 @@
-import {
-	type HyperAPIDriver,
-	type HyperAPIDriverHandler,
-	HyperAPIError,
-} from '@hyperapi/core';
+import { HyperAPIError } from '@hyperapi/core';
+import { HyperAPIDriver } from '@hyperapi/core/dev';
 import { IP } from '@kirick/ip';
 import type { Server } from 'bun';
 import type { HyperAPIBunRequest } from './request.js';
@@ -16,39 +13,29 @@ interface Config {
 	multipart_formdata_enabled?: boolean;
 }
 
-export class HyperAPIBunDriver
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	implements HyperAPIDriver<HyperAPIBunRequest<any>>
-{
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private handler: HyperAPIDriverHandler<HyperAPIBunRequest<any>> | null = null;
+export class HyperAPIBunDriver extends HyperAPIDriver<HyperAPIBunRequest> {
 	private port: number;
 	private path: string;
 	private multipart_formdata_enabled: boolean;
-	private server: Server | null = null;
+	private server: Server;
 
 	/**
 	 * @param options -
 	 * @param options.port - HTTP server port. Default: `8001`.
-	 * @param [options.path] - Path to serve. Default: `/api/`.
-	 * @param [options.multipart_formdata_enabled] - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
+	 * @param options.path - Path to serve. Default: `/api/`.
+	 * @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
 	 */
 	constructor({
 		port,
 		path = '/api/',
 		multipart_formdata_enabled = false,
 	}: Config) {
+		super();
+
 		this.port = port;
 		this.path = path;
 		this.multipart_formdata_enabled = multipart_formdata_enabled;
-	}
 
-	/**
-	 * Starts the server.
-	 * @param handler - The handler to use.
-	 */
-	start(handler: HyperAPIDriverHandler<HyperAPIBunRequest>): void {
-		this.handler = handler;
 		this.server = Bun.serve({
 			development: false,
 			port: this.port,
@@ -74,11 +61,6 @@ export class HyperAPIBunDriver
 		});
 	}
 
-	/** Stops the server. */
-	stop(): void {
-		this.server?.stop();
-	}
-
 	/**
 	 * Handles the HTTP request.
 	 * @param request - HTTP request.
@@ -89,11 +71,6 @@ export class HyperAPIBunDriver
 		request: Request,
 		server: Server,
 	): Promise<Response> {
-		if (!this.handler) {
-			throw new Error('No handler available.');
-		}
-
-		// FIXME: doesn't work after async functions
 		const socket_address = server.requestIP(request);
 		if (socket_address === null) {
 			throw new Error('Cannot get IP address from request.');
@@ -117,10 +94,7 @@ export class HyperAPIBunDriver
 			this.multipart_formdata_enabled,
 		);
 
-		// FIXME: doesn't work after async functions
-		// const { address: ip_address } = server.requestIP(request);
-
-		const hyperapi_response = await this.handler({
+		const hyperapi_response = await this.emitRequest({
 			method: http_method,
 			path: hyperapi_method,
 			args: hyperapi_args,
@@ -148,6 +122,13 @@ export class HyperAPIBunDriver
 				},
 			},
 		);
+	}
+
+	/** Stops the server. */
+	override destroy(): void {
+		this.server.stop();
+
+		super.destroy();
 	}
 }
 

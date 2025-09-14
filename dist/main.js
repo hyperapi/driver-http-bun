@@ -1,4 +1,5 @@
 import { HyperAPIError, HyperAPIInvalidParametersError } from "@hyperapi/core";
+import { HyperAPIDriver, isRecord } from "@hyperapi/core/dev";
 import { IP } from "@kirick/ip";
 
 //#region src/utils/http.ts
@@ -38,17 +39,6 @@ function hyperApiErrorToResponse(error, add_body) {
 		status: error.httpStatus ?? 500,
 		headers
 	});
-}
-
-//#endregion
-//#region src/utils/is-record.ts
-/**
-* Check if a value is a record.
-* @param value -
-* @returns -
-*/
-function isRecord(value) {
-	return typeof value === "object" && value !== null && !Array.isArray(value) && value.constructor === Object && Object.prototype.toString.call(value) === "[object Object]";
 }
 
 //#endregion
@@ -129,29 +119,22 @@ async function parseArguments(request, url, multipart_formdata_enabled) {
 
 //#endregion
 //#region src/main.ts
-var HyperAPIBunDriver = class {
-	handler = null;
+var HyperAPIBunDriver = class extends HyperAPIDriver {
 	port;
 	path;
 	multipart_formdata_enabled;
-	server = null;
+	server;
 	/**
 	* @param options -
 	* @param options.port - HTTP server port. Default: `8001`.
-	* @param [options.path] - Path to serve. Default: `/api/`.
-	* @param [options.multipart_formdata_enabled] - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
+	* @param options.path - Path to serve. Default: `/api/`.
+	* @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
 	*/
 	constructor({ port, path = "/api/", multipart_formdata_enabled = false }) {
+		super();
 		this.port = port;
 		this.path = path;
 		this.multipart_formdata_enabled = multipart_formdata_enabled;
-	}
-	/**
-	* Starts the server.
-	* @param handler - The handler to use.
-	*/
-	start(handler) {
-		this.handler = handler;
 		this.server = Bun.serve({
 			development: false,
 			port: this.port,
@@ -167,10 +150,6 @@ var HyperAPIBunDriver = class {
 			}
 		});
 	}
-	/** Stops the server. */
-	stop() {
-		this.server?.stop();
-	}
 	/**
 	* Handles the HTTP request.
 	* @param request - HTTP request.
@@ -178,7 +157,6 @@ var HyperAPIBunDriver = class {
 	* @returns -
 	*/
 	async processRequest(request, server) {
-		if (!this.handler) throw new Error("No handler available.");
 		const socket_address = server.requestIP(request);
 		if (socket_address === null) throw new Error("Cannot get IP address from request.");
 		const http_method = request.method;
@@ -187,7 +165,7 @@ var HyperAPIBunDriver = class {
 		if (url.pathname.startsWith(this.path) !== true) return new Response(void 0, { status: 404 });
 		const hyperapi_method = url.pathname.slice(this.path.length);
 		const hyperapi_args = await parseArguments(request, url, this.multipart_formdata_enabled);
-		const hyperapi_response = await this.handler({
+		const hyperapi_response = await this.emitRequest({
 			method: http_method,
 			path: hyperapi_method,
 			args: hyperapi_args,
@@ -201,6 +179,11 @@ var HyperAPIBunDriver = class {
 			status: 200,
 			headers: { "Content-Type": "application/json" }
 		});
+	}
+	/** Stops the server. */
+	destroy() {
+		this.server.stop();
+		super.destroy();
 	}
 };
 

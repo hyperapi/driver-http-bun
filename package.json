@@ -1,6 +1,6 @@
 {
 	"name": "@hyperapi/driver-bun",
-	"version": "0.3.0-dev",
+	"version": "0.5.0-dev",
 	"description": "HyperAPI HTTP driver for Bun.",
 	"publishConfig": {
 		"access": "public"
@@ -15,7 +15,7 @@
 		"node": ">=21"
 	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#3d1898caa28e0cbc55c978f33bd9edf5a836337a",
+		"@hyperapi/core": "github:hyperapi/core#5b3d7425be5b8526055aceeb4475a48f430d1736",
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
@@ -29,6 +29,7 @@
 		"type-fest": "4.41.0",
 		"typescript": "5.9.2",
 		"unplugin-unused": "0.5.2",
+		"valibot": "^1.1.0",
 		"vitest": "3.2.4"
 	},
 	"scripts": {

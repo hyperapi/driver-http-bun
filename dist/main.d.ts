@@ -1,9 +1,8 @@
-import { HyperAPIDriver, HyperAPIDriverHandler, HyperAPIRequest } from "@hyperapi/core";
+import { BaseRecord, EmptyObject, HyperAPIDriver, HyperAPIRequest } from "@hyperapi/core/dev";
 import { IP } from "@kirick/ip";
-import { EmptyObject } from "type-fest";
 
 //#region src/request.d.ts
-interface HyperAPIBunRequest<A extends Record<string, unknown> = EmptyObject> extends HyperAPIRequest<A> {
+interface HyperAPIBunRequest<A extends BaseRecord = EmptyObject> extends HyperAPIRequest<A> {
   url: URL;
   headers: Headers;
   ip: IP;
@@ -15,8 +14,7 @@ interface Config {
   path?: string;
   multipart_formdata_enabled?: boolean;
 }
-declare class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any>> {
-  private handler;
+declare class HyperAPIBunDriver extends HyperAPIDriver<HyperAPIBunRequest> {
   private port;
   private path;
   private multipart_formdata_enabled;
@@ -24,8 +22,8 @@ declare class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any
   /**
   * @param options -
   * @param options.port - HTTP server port. Default: `8001`.
-  * @param [options.path] - Path to serve. Default: `/api/`.
-  * @param [options.multipart_formdata_enabled] - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
+  * @param options.path - Path to serve. Default: `/api/`.
+  * @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
   */
   constructor({
     port,
@@ -33,19 +31,14 @@ declare class HyperAPIBunDriver implements HyperAPIDriver<HyperAPIBunRequest<any
     multipart_formdata_enabled
   }: Config);
   /**
-  * Starts the server.
-  * @param handler - The handler to use.
-  */
-  start(handler: HyperAPIDriverHandler<HyperAPIBunRequest>): void;
-  /** Stops the server. */
-  stop(): void;
-  /**
   * Handles the HTTP request.
   * @param request - HTTP request.
   * @param server - Bun server.
   * @returns -
   */
   private processRequest;
+  /** Stops the server. */
+  destroy(): void;
 }
 //#endregion
 export { HyperAPIBunDriver, type HyperAPIBunRequest };

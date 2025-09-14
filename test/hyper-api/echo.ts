@@ -1,14 +1,13 @@
-/* eslint-disable jsdoc/require-jsdoc */
+import * as v from 'valibot';
+import { hyperApi, valibot } from '../setup.js';
 
-import { type HyperAPIResponse } from '@hyperapi/core';
-import { type HyperAPIBunRequest } from '../../src/main.js';
-
-export default function (
-	request: HyperAPIBunRequest<{ name: string }>,
-): HyperAPIResponse {
-	return {
-		method: 'ALL',
-		message: `Hello, ${request.args.name}!`,
-		header_value: request.headers.get('x-test-header'),
-	};
-}
+export default hyperApi
+	.module()
+	.use(valibot(v.object({ name: v.string() })))
+	.action((request) => {
+		return {
+			method: 'ALL',
+			message: `Hello, ${request.args.name}!`,
+			header_value: request.headers.get('x-test-header'),
+		};
+	});

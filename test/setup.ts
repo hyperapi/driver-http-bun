@@ -1,18 +1,28 @@
 import { HyperAPI } from '@hyperapi/core';
+import type { HyperAPIRequest } from '@hyperapi/core/dev';
+import * as v from 'valibot';
 import { HyperAPIBunDriver } from '../src/main.js';
 
-export const hyperApi = new HyperAPI({
-	driver: new HyperAPIBunDriver({
-		port: 18001,
-		// multipart_formdata_enabled: true,
-	}),
-	root: new URL('hyper-api', import.meta.url).pathname,
-});
+const ROOT = new URL('hyper-api', import.meta.url).pathname;
 
-export const hyperApiMultipart = new HyperAPI({
-	driver: new HyperAPIBunDriver({
+export const hyperApi = new HyperAPI(
+	new HyperAPIBunDriver({
+		port: 18001,
+	}),
+	ROOT,
+);
+
+export const hyperApiMultipart = new HyperAPI(
+	new HyperAPIBunDriver({
 		port: 18002,
 		multipart_formdata_enabled: true,
 	}),
-	root: new URL('hyper-api', import.meta.url).pathname,
-});
+	ROOT,
+);
+
+// eslint-disable-next-line jsdoc/require-jsdoc, @typescript-eslint/no-explicit-any
+export function valibot<S extends v.BaseSchema<any, any, any>>(schema: S) {
+	return (request: HyperAPIRequest) => {
+		return { args: v.parse(schema, request.args) };
+	};
+}

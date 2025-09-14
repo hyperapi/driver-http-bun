@@ -1,15 +1,14 @@
-/* eslint-disable jsdoc/require-jsdoc */
+import * as v from 'valibot';
+import { hyperApi, valibot } from '../setup.js';
 
-import { type HyperAPIResponse } from '@hyperapi/core';
-import { type HyperAPIBunRequest } from '../../src/main.js';
+export default hyperApi
+	.module()
+	.use(valibot(v.object({ name: v.file() })))
+	.action(async (request) => {
+		const name = await request.args.name.text();
 
-export default async function (
-	request: HyperAPIBunRequest<{ name: Blob }>,
-): Promise<HyperAPIResponse> {
-	const name = await request.args.name.text();
-
-	return {
-		method: 'ALL',
-		message: `Hello, ${name}!`,
-	};
-}
+		return {
+			method: 'ALL',
+			message: `Hello, ${name}!`,
+		};
+	});
