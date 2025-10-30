@@ -7,7 +7,7 @@ import { HyperAPIError } from '@hyperapi/core';
  * @returns -
  */
 export function hyperApiErrorToResponse(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	// oxlint-disable-next-line typescript/no-explicit-any
 	error: HyperAPIError<any>,
 	add_body: boolean,
 ): Response {
