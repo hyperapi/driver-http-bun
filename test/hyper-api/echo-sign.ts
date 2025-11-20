@@ -1,12 +1,12 @@
 import { HyperAPIInvalidParametersError } from '@hyperapi/core';
 import * as v from 'valibot';
 import type { HyperAPIBunRequestWithRequest } from '../../src/request.js';
+import { HyperAPIInvalidSignature } from '../hyperapi-error.js';
 import {
 	generateHmacSha256,
 	hyperApiWithoutParse,
 	type ValiBaseSchema,
 } from '../setup.js';
-import { HyperAPIInvalidSignature } from './error.js';
 
 export const SECRET = 'secret';
 
