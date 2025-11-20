@@ -2,21 +2,32 @@ import { HyperAPIError } from '@hyperapi/core';
 import { HyperAPIDriver } from '@hyperapi/core/dev';
 import { IP } from '@kirick/ip';
 import type { Server } from 'bun';
-import type { HyperAPIBunRequest } from './request.js';
+import type {
+	HyperAPIBunRequestWithArgs,
+	HyperAPIBunRequestWithRequest,
+} from './request.js';
 import { isHttpMethodSupported, isResponseBodyRequired } from './utils/http.js';
 import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
-import { parseArguments } from './utils/parse.js';
+import { parseArguments, type RequestArgs } from './utils/parse.js';
 
-interface Config {
+interface Config<P extends boolean = true> {
 	port: number;
 	path?: string;
 	multipart_formdata_enabled?: boolean;
+	parse_body?: P;
 }
 
-export class HyperAPIBunDriver extends HyperAPIDriver<HyperAPIBunRequest> {
+type HyperAPIBunRequestBody<P extends boolean = true> = P extends true
+	? HyperAPIBunRequestWithArgs<RequestArgs>
+	: HyperAPIBunRequestWithRequest;
+
+export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
+	HyperAPIBunRequestBody<P>
+> {
 	private port: number;
 	private path: string;
 	private multipart_formdata_enabled: boolean;
+	private parse_body: P;
 	private server: Server;
 
 	/**
@@ -24,17 +35,20 @@ export class HyperAPIBunDriver extends HyperAPIDriver<HyperAPIBunRequest> {
 	 * @param options.port - HTTP server port. Default: `8001`.
 	 * @param options.path - Path to serve. Default: `/api/`.
 	 * @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
+	 * @param options.parse_body - If `true`, server would parse requests. Default: `true`.
 	 */
 	constructor({
 		port,
 		path = '/api/',
 		multipart_formdata_enabled = false,
-	}: Config) {
+		parse_body = true as P,
+	}: Config<P>) {
 		super();
 
 		this.port = port;
 		this.path = path;
 		this.multipart_formdata_enabled = multipart_formdata_enabled;
+		this.parse_body = parse_body;
 
 		this.server = Bun.serve({
 			development: false,
@@ -88,20 +102,35 @@ export class HyperAPIBunDriver extends HyperAPIDriver<HyperAPIBunRequest> {
 
 		const hyperapi_method = url.pathname.slice(this.path.length);
 
-		const hyperapi_args = await parseArguments(
-			request,
-			url as URL,
-			this.multipart_formdata_enabled,
-		);
-
-		const hyperapi_response = await this.emitRequest({
+		const base_body = {
 			method: http_method,
 			path: hyperapi_method,
-			args: hyperapi_args,
 			url: url as URL,
 			headers: request.headers,
 			ip: new IP(socket_address.address),
-		});
+		};
+
+		let body: HyperAPIBunRequestBody<P>;
+		if (this.parse_body) {
+			const hyperapi_args = await parseArguments(
+				request,
+				url as URL,
+				this.multipart_formdata_enabled,
+			);
+
+			body = {
+				...base_body,
+				args: hyperapi_args,
+			} as HyperAPIBunRequestBody<P>;
+		} else {
+			body = {
+				...base_body,
+				args: {},
+				request,
+			} as HyperAPIBunRequestBody<P>;
+		}
+
+		const hyperapi_response = await this.emitRequest(body);
 
 		if (hyperapi_response instanceof HyperAPIError) {
 			throw hyperapi_response;

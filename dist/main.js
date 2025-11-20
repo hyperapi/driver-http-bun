@@ -123,18 +123,21 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 	port;
 	path;
 	multipart_formdata_enabled;
+	parse_body;
 	server;
 	/**
 	* @param options -
 	* @param options.port - HTTP server port. Default: `8001`.
 	* @param options.path - Path to serve. Default: `/api/`.
 	* @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
+	* @param options.parse_body - If `true`, server would parse requests. Default: `true`.
 	*/
-	constructor({ port, path = "/api/", multipart_formdata_enabled = false }) {
+	constructor({ port, path = "/api/", multipart_formdata_enabled = false, parse_body = true }) {
 		super();
 		this.port = port;
 		this.path = path;
 		this.multipart_formdata_enabled = multipart_formdata_enabled;
+		this.parse_body = parse_body;
 		this.server = Bun.serve({
 			development: false,
 			port: this.port,
@@ -163,16 +166,26 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 		if (isHttpMethodSupported(http_method) !== true) return new Response(void 0, { status: 405 });
 		const url = new URL(request.url);
 		if (url.pathname.startsWith(this.path) !== true) return new Response(void 0, { status: 404 });
-		const hyperapi_method = url.pathname.slice(this.path.length);
-		const hyperapi_args = await parseArguments(request, url, this.multipart_formdata_enabled);
-		const hyperapi_response = await this.emitRequest({
+		const base_body = {
 			method: http_method,
-			path: hyperapi_method,
-			args: hyperapi_args,
+			path: url.pathname.slice(this.path.length),
 			url,
 			headers: request.headers,
 			ip: new IP(socket_address.address)
-		});
+		};
+		let body;
+		if (this.parse_body) {
+			const hyperapi_args = await parseArguments(request, url, this.multipart_formdata_enabled);
+			body = {
+				...base_body,
+				args: hyperapi_args
+			};
+		} else body = {
+			...base_body,
+			args: {},
+			request
+		};
+		const hyperapi_response = await this.emitRequest(body);
 		if (hyperapi_response instanceof HyperAPIError) throw hyperapi_response;
 		if (hyperapi_response instanceof Response) return hyperapi_response;
 		return new Response(isResponseBodyRequired(http_method) ? JSON.stringify(hyperapi_response) : void 0, {
