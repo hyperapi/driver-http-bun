@@ -15,7 +15,7 @@ function getMIME(type: string): string {
 	return type.trim();
 }
 
-type RequestArgs = Record<string, unknown>;
+export type RequestArgs = Record<string, unknown>;
 
 class HyperAPIBodyInvalidError extends HyperAPIInvalidParametersError<{
 	message: string;

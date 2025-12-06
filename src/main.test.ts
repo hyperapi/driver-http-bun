@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import '../test/setup.js';
+import { SECRET } from '../test/hyper-api/echo-sign.js';
+import { generateHmacSha256 } from '../test/setup.js';
 
 describe('args', () => {
 	test('GET', async () => {
@@ -110,6 +112,59 @@ describe('args', () => {
 
 			const body = await response.text();
 			expect(body).toEqual('Hello, foo!');
+		});
+	});
+});
+
+describe('request', () => {
+	describe('POST', () => {
+		test('echo with valid signature', async () => {
+			const request_body = JSON.stringify({
+				name: 'foo',
+			});
+
+			const sign = generateHmacSha256(SECRET, request_body);
+			const response = await fetch('http://localhost:18003/api/echo-sign', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Signature': sign,
+				},
+				body: request_body,
+			});
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get('Content-Type')).toBe('application/json');
+
+			const body = await response.json();
+			expect(body).toStrictEqual({
+				method: 'echo-sign',
+				message: `Hello, foo!`,
+			});
+		});
+
+		test('echo with invalid signature', async () => {
+			const request_body = JSON.stringify({
+				name: 'foo',
+			});
+
+			const sign = 'mysign';
+			const response = await fetch('http://localhost:18003/api/echo-sign', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Signature': sign,
+				},
+				body: request_body,
+			});
+
+			expect(response.status).toBe(403);
+			expect(response.headers.get('Content-Type')).toBe('application/json');
+			const body = await response.json();
+			expect(body).toStrictEqual({
+				code: 101,
+				description: 'Invalid signature',
+			});
 		});
 	});
 });
