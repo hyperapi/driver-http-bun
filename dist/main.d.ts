@@ -10,11 +10,10 @@ interface HyperAPIBunRequestBase {
 interface HyperAPIBunRequestWithArgs<A extends BaseRecord = EmptyObject> extends HyperAPIRequest<A>, HyperAPIBunRequestBase {
   args: A;
 }
-interface HyperAPIBunRequestWithRequest extends Omit<HyperAPIRequest<EmptyObject>, "args">, HyperAPIBunRequestBase {
+interface HyperAPIBunRequestWithRequest extends HyperAPIRequest<EmptyObject>, HyperAPIBunRequestBase {
   request: Request;
-  args: EmptyObject;
 }
-type HyperAPIBunRequest<A extends BaseRecord = EmptyObject> = HyperAPIBunRequestWithArgs<A> | HyperAPIBunRequestWithRequest;
+type HyperAPIBunRequest<P extends boolean = true, A extends BaseRecord = EmptyObject> = P extends true ? HyperAPIBunRequestWithArgs<A> : HyperAPIBunRequestWithRequest;
 //#endregion
 //#region src/utils/parse.d.ts
 type RequestArgs = Record<string, unknown>;
@@ -26,8 +25,7 @@ interface Config<P extends boolean = true> {
   multipart_formdata_enabled?: boolean;
   parse_body?: P;
 }
-type HyperAPIBunRequestBody<P extends boolean = true> = P extends true ? HyperAPIBunRequestWithArgs<RequestArgs> : HyperAPIBunRequestWithRequest;
-declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<HyperAPIBunRequestBody<P>> {
+declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<HyperAPIBunRequest<P, RequestArgs>> {
   private port;
   private path;
   private multipart_formdata_enabled;

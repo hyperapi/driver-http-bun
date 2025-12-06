@@ -18,12 +18,14 @@ export interface HyperAPIBunRequestWithArgs<A extends BaseRecord = EmptyObject>
 }
 
 export interface HyperAPIBunRequestWithRequest
-	extends Omit<HyperAPIRequest<EmptyObject>, 'args'>,
+	extends HyperAPIRequest<EmptyObject>,
 		HyperAPIBunRequestBase {
 	request: Request;
-	args: EmptyObject;
 }
 
-export type HyperAPIBunRequest<A extends BaseRecord = EmptyObject> =
-	| HyperAPIBunRequestWithArgs<A>
-	| HyperAPIBunRequestWithRequest;
+export type HyperAPIBunRequest<
+	P extends boolean = true,
+	A extends BaseRecord = EmptyObject,
+> = P extends true
+	? HyperAPIBunRequestWithArgs<A>
+	: HyperAPIBunRequestWithRequest;

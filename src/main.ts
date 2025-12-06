@@ -2,10 +2,7 @@ import { HyperAPIError } from '@hyperapi/core';
 import { HyperAPIDriver } from '@hyperapi/core/dev';
 import { IP } from '@kirick/ip';
 import type { Server } from 'bun';
-import type {
-	HyperAPIBunRequestWithArgs,
-	HyperAPIBunRequestWithRequest,
-} from './request.js';
+import type { HyperAPIBunRequest } from './request.js';
 import { isHttpMethodSupported, isResponseBodyRequired } from './utils/http.js';
 import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
 import { parseArguments, type RequestArgs } from './utils/parse.js';
@@ -17,12 +14,8 @@ interface Config<P extends boolean = true> {
 	parse_body?: P;
 }
 
-type HyperAPIBunRequestBody<P extends boolean = true> = P extends true
-	? HyperAPIBunRequestWithArgs<RequestArgs>
-	: HyperAPIBunRequestWithRequest;
-
 export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
-	HyperAPIBunRequestBody<P>
+	HyperAPIBunRequest<P, RequestArgs>
 > {
 	private port: number;
 	private path: string;
@@ -110,7 +103,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 			ip: new IP(socket_address.address),
 		};
 
-		let body: HyperAPIBunRequestBody<P>;
+		let body: HyperAPIBunRequest<P, RequestArgs>;
 		if (this.parse_body) {
 			const hyperapi_args = await parseArguments(
 				request,
@@ -121,13 +114,13 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 			body = {
 				...base_body,
 				args: hyperapi_args,
-			} as HyperAPIBunRequestBody<P>;
+			} as HyperAPIBunRequest<P, RequestArgs>;
 		} else {
 			body = {
 				...base_body,
 				args: {},
 				request,
-			} as HyperAPIBunRequestBody<P>;
+			} as HyperAPIBunRequest<P, RequestArgs>;
 		}
 
 		const hyperapi_response = await this.emitRequest(body);

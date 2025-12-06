@@ -118,11 +118,11 @@ describe('args', () => {
 
 describe('request', () => {
 	describe('POST', () => {
-		test('echo with valid signature', async () => {
-			const request_body = JSON.stringify({
-				name: 'foo',
-			});
+		const request_body = JSON.stringify({
+			name: 'foo',
+		});
 
+		test('echo with valid signature', async () => {
 			const sign = generateHmacSha256(SECRET, request_body);
 			const response = await fetch('http://localhost:18003/api/echo-sign', {
 				method: 'POST',
@@ -144,11 +144,7 @@ describe('request', () => {
 		});
 
 		test('echo with invalid signature', async () => {
-			const request_body = JSON.stringify({
-				name: 'foo',
-			});
-
-			const sign = 'mysign';
+			const sign = 'intentionally-invalid-signature';
 			const response = await fetch('http://localhost:18003/api/echo-sign', {
 				method: 'POST',
 				headers: {
