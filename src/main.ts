@@ -95,7 +95,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 
 		const hyperapi_method = url.pathname.slice(this.path.length);
 
-		const base_body = {
+		const hyperapi_request_base = {
 			method: http_method,
 			path: hyperapi_method,
 			url: url as URL,
@@ -103,7 +103,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 			ip: new IP(socket_address.address),
 		};
 
-		let body: HyperAPIBunRequest<P, RequestArgs>;
+		let hyperapi_request: HyperAPIBunRequest<P, RequestArgs>;
 		if (this.parse_body) {
 			const hyperapi_args = await parseArguments(
 				request,
@@ -111,19 +111,19 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 				this.multipart_formdata_enabled,
 			);
 
-			body = {
-				...base_body,
+			hyperapi_request = {
+				...hyperapi_request_base,
 				args: hyperapi_args,
 			} as HyperAPIBunRequest<P, RequestArgs>;
 		} else {
-			body = {
-				...base_body,
+			hyperapi_request = {
+				...hyperapi_request_base,
 				args: {},
 				request,
 			} as HyperAPIBunRequest<P, RequestArgs>;
 		}
 
-		const hyperapi_response = await this.emitRequest(body);
+		const hyperapi_response = await this.emitRequest(hyperapi_request);
 
 		if (hyperapi_response instanceof HyperAPIError) {
 			throw hyperapi_response;

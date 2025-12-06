@@ -166,26 +166,26 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 		if (isHttpMethodSupported(http_method) !== true) return new Response(void 0, { status: 405 });
 		const url = new URL(request.url);
 		if (url.pathname.startsWith(this.path) !== true) return new Response(void 0, { status: 404 });
-		const base_body = {
+		const hyperapi_request_base = {
 			method: http_method,
 			path: url.pathname.slice(this.path.length),
 			url,
 			headers: request.headers,
 			ip: new IP(socket_address.address)
 		};
-		let body;
+		let hyperapi_request;
 		if (this.parse_body) {
 			const hyperapi_args = await parseArguments(request, url, this.multipart_formdata_enabled);
-			body = {
-				...base_body,
+			hyperapi_request = {
+				...hyperapi_request_base,
 				args: hyperapi_args
 			};
-		} else body = {
-			...base_body,
+		} else hyperapi_request = {
+			...hyperapi_request_base,
 			args: {},
 			request
 		};
-		const hyperapi_response = await this.emitRequest(body);
+		const hyperapi_response = await this.emitRequest(hyperapi_request);
 		if (hyperapi_response instanceof HyperAPIError) throw hyperapi_response;
 		if (hyperapi_response instanceof Response) return hyperapi_response;
 		return new Response(isResponseBodyRequired(http_method) ? JSON.stringify(hyperapi_response) : void 0, {
