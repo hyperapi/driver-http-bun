@@ -154,4 +154,8 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	}
 }
 
-export type { HyperAPIBunRequest } from './request.js';
+export type {
+	HyperAPIBunRequest,
+	HyperAPIBunRequestWithArgs,
+	HyperAPIBunRequestWithRequest,
+} from './request.js';

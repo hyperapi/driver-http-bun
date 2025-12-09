@@ -55,4 +55,4 @@ declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver
   destroy(): void;
 }
 //#endregion
-export { HyperAPIBunDriver, type HyperAPIBunRequest };
+export { HyperAPIBunDriver, type HyperAPIBunRequest, type HyperAPIBunRequestWithArgs, type HyperAPIBunRequestWithRequest };
