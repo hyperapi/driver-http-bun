@@ -8,7 +8,7 @@ import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
 import { parseArguments, type RequestArgs } from './utils/parse.js';
 
 interface Config<P extends boolean = true> {
-	port: number;
+	port?: number;
 	path?: string;
 	multipart_formdata_enabled?: boolean;
 	parse_body?: P;
@@ -17,55 +17,57 @@ interface Config<P extends boolean = true> {
 export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	HyperAPIBunRequest<P, RequestArgs>
 > {
-	private port: number;
-	private path: string;
+	#path_prefix: string;
 	private multipart_formdata_enabled: boolean;
 	private parse_body: P;
-	private server: Server;
+	#server: Server<unknown> | undefined;
 
 	/**
 	 * @param options -
-	 * @param options.port - HTTP server port. Default: `8001`.
+	 * @param options.port - HTTP server port. If not provided, server will not be started, you should start it manually.
 	 * @param options.path - Path to serve. Default: `/api/`.
 	 * @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
 	 * @param options.parse_body - If `true`, server would parse requests. Default: `true`.
 	 */
 	constructor({
 		port,
-		path = '/api/',
+		path = '/',
 		multipart_formdata_enabled = false,
 		parse_body = true as P,
 	}: Config<P>) {
 		super();
 
-		this.port = port;
-		this.path = path;
+		this.#path_prefix = path.replace(/\/$/u, '');
 		this.multipart_formdata_enabled = multipart_formdata_enabled;
 		this.parse_body = parse_body;
 
-		this.server = Bun.serve({
-			development: false,
-			port: this.port,
-			fetch: async (request, server) => {
-				try {
-					return await this.processRequest(request, server);
-				} catch (error) {
-					if (error instanceof HyperAPIError) {
-						return hyperApiErrorToResponse(
-							error,
-							isResponseBodyRequired(request.method),
-						);
-					}
+		if (port !== undefined) {
+			this.#server = Bun.serve({
+				development: process.env.NODE_ENV !== 'production',
+				port,
+				fetch: this.handler.bind(this),
+			});
+		}
+	}
 
-					// oxlint-disable-next-line no-console
-					console.error('Unhandled error in @hyperapi/driver-bun:');
-					// oxlint-disable-next-line no-console
-					console.error(error);
+	async handler(request: Request, server: Server<unknown>): Promise<Response> {
+		try {
+			return await this.processRequest(request, server);
+		} catch (error) {
+			if (error instanceof HyperAPIError) {
+				return hyperApiErrorToResponse(
+					error,
+					isResponseBodyRequired(request.method),
+				);
+			}
 
-					return new Response(undefined, { status: 500 });
-				}
-			},
-		});
+			// oxlint-disable-next-line no-console
+			console.error('Unhandled error in @hyperapi/driver-bun:');
+			// oxlint-disable-next-line no-console
+			console.error(error);
+
+			return new Response(undefined, { status: 500 });
+		}
 	}
 
 	/**
@@ -76,28 +78,35 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	 */
 	private async processRequest(
 		request: Request,
-		server: Server,
+		server: Server<unknown>,
 	): Promise<Response> {
 		const socket_address = server.requestIP(request);
 		if (socket_address === null) {
 			throw new Error('Cannot get IP address from request.');
 		}
 
-		const http_method = request.method;
+		let http_method = request.method;
 		if (isHttpMethodSupported(http_method) !== true) {
 			return new Response(undefined, { status: 405 });
 		}
 
-		const url = new URL(request.url);
-		if (url.pathname.startsWith(this.path) !== true) {
+		if (http_method === 'HEAD') {
+			http_method = 'GET';
+		}
+
+		const url = new URL(request.url, 'http://hyperapi');
+		let hyperapi_path;
+		if (url.pathname === this.#path_prefix) {
+			hyperapi_path = '/';
+		} else if (url.pathname.startsWith(`${this.#path_prefix}/`)) {
+			hyperapi_path = url.pathname.slice(this.#path_prefix.length);
+		} else {
 			return new Response(undefined, { status: 404 });
 		}
 
-		const hyperapi_method = url.pathname.slice(this.path.length);
-
 		const hyperapi_request_base = {
 			method: http_method,
-			path: hyperapi_method,
+			path: hyperapi_path,
 			url: url as URL,
 			headers: request.headers,
 			ip: new IP(socket_address.address),
@@ -147,8 +156,8 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	}
 
 	/** Stops the server. */
-	override destroy(): void {
-		this.server.stop();
+	override async destroy(): Promise<void> {
+		await this.#server?.stop(true);
 
 		super.destroy();
 	}

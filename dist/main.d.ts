@@ -1,5 +1,6 @@
 import { BaseRecord, EmptyObject, HyperAPIDriver, HyperAPIRequest } from "@hyperapi/core/dev";
 import { IP } from "@kirick/ip";
+import { Server } from "bun";
 
 //#region src/request.d.ts
 interface HyperAPIBunRequestBase {
@@ -20,20 +21,18 @@ type RequestArgs = Record<string, unknown>;
 //#endregion
 //#region src/main.d.ts
 interface Config<P extends boolean = true> {
-  port: number;
+  port?: number;
   path?: string;
   multipart_formdata_enabled?: boolean;
   parse_body?: P;
 }
 declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<HyperAPIBunRequest<P, RequestArgs>> {
-  private port;
-  private path;
+  #private;
   private multipart_formdata_enabled;
   private parse_body;
-  private server;
   /**
   * @param options -
-  * @param options.port - HTTP server port. Default: `8001`.
+  * @param options.port - HTTP server port. If not provided, server will not be started, you should start it manually.
   * @param options.path - Path to serve. Default: `/api/`.
   * @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
   * @param options.parse_body - If `true`, server would parse requests. Default: `true`.
@@ -44,6 +43,7 @@ declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver
     multipart_formdata_enabled,
     parse_body
   }: Config<P>);
+  handler(request: Request, server: Server<unknown>): Promise<Response>;
   /**
   * Handles the HTTP request.
   * @param request - HTTP request.
@@ -52,7 +52,7 @@ declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver
   */
   private processRequest;
   /** Stops the server. */
-  destroy(): void;
+  destroy(): Promise<void>;
 }
 //#endregion
 export { HyperAPIBunDriver, type HyperAPIBunRequest, type HyperAPIBunRequestWithArgs, type HyperAPIBunRequestWithRequest };

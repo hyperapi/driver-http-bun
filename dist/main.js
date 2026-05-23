@@ -83,18 +83,17 @@ async function parseArguments(request, url, multipart_formdata_enabled) {
 		const type_header = request.headers.get("Content-Type");
 		const type_mime = type_header === null ? "<no Content-Type header provided>" : getMIME(type_header);
 		switch (type_mime) {
-			case "application/json":
-				{
-					let args_json;
-					try {
-						args_json = await request.json();
-					} catch {
-						throw new HyperAPIBodyInvalidError();
-					}
-					if (isRecord(args_json) !== true) throw new HyperAPIBodyInvalidError("JSON body must be an object");
-					args = args_json;
+			case "application/json": {
+				let args_json;
+				try {
+					args_json = await request.json();
+				} catch {
+					throw new HyperAPIBodyInvalidError();
 				}
+				if (isRecord(args_json) !== true) throw new HyperAPIBodyInvalidError("JSON body must be an object");
+				args = args_json;
 				break;
+			}
 			case "multipart/form-data":
 				if (multipart_formdata_enabled !== true) throw new HyperAPIBodyUnknownError(type_mime);
 				try {
@@ -120,38 +119,37 @@ async function parseArguments(request, url, multipart_formdata_enabled) {
 //#endregion
 //#region src/main.ts
 var HyperAPIBunDriver = class extends HyperAPIDriver {
-	port;
-	path;
+	#path_prefix;
 	multipart_formdata_enabled;
 	parse_body;
-	server;
+	#server;
 	/**
 	* @param options -
-	* @param options.port - HTTP server port. Default: `8001`.
+	* @param options.port - HTTP server port. If not provided, server will not be started, you should start it manually.
 	* @param options.path - Path to serve. Default: `/api/`.
 	* @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
 	* @param options.parse_body - If `true`, server would parse requests. Default: `true`.
 	*/
-	constructor({ port, path = "/api/", multipart_formdata_enabled = false, parse_body = true }) {
+	constructor({ port, path = "/", multipart_formdata_enabled = false, parse_body = true }) {
 		super();
-		this.port = port;
-		this.path = path;
+		this.#path_prefix = path.replace(/\/$/u, "");
 		this.multipart_formdata_enabled = multipart_formdata_enabled;
 		this.parse_body = parse_body;
-		this.server = Bun.serve({
-			development: false,
-			port: this.port,
-			fetch: async (request, server) => {
-				try {
-					return await this.processRequest(request, server);
-				} catch (error) {
-					if (error instanceof HyperAPIError) return hyperApiErrorToResponse(error, isResponseBodyRequired(request.method));
-					console.error("Unhandled error in @hyperapi/driver-bun:");
-					console.error(error);
-					return new Response(void 0, { status: 500 });
-				}
-			}
+		if (port !== void 0) this.#server = Bun.serve({
+			development: process.env.NODE_ENV !== "production",
+			port,
+			fetch: this.handler.bind(this)
 		});
+	}
+	async handler(request, server) {
+		try {
+			return await this.processRequest(request, server);
+		} catch (error) {
+			if (error instanceof HyperAPIError) return hyperApiErrorToResponse(error, isResponseBodyRequired(request.method));
+			console.error("Unhandled error in @hyperapi/driver-bun:");
+			console.error(error);
+			return new Response(void 0, { status: 500 });
+		}
 	}
 	/**
 	* Handles the HTTP request.
@@ -162,13 +160,17 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 	async processRequest(request, server) {
 		const socket_address = server.requestIP(request);
 		if (socket_address === null) throw new Error("Cannot get IP address from request.");
-		const http_method = request.method;
+		let http_method = request.method;
 		if (isHttpMethodSupported(http_method) !== true) return new Response(void 0, { status: 405 });
-		const url = new URL(request.url);
-		if (url.pathname.startsWith(this.path) !== true) return new Response(void 0, { status: 404 });
+		if (http_method === "HEAD") http_method = "GET";
+		const url = new URL(request.url, "http://hyperapi");
+		let hyperapi_path;
+		if (url.pathname === this.#path_prefix) hyperapi_path = "/";
+		else if (url.pathname.startsWith(`${this.#path_prefix}/`)) hyperapi_path = url.pathname.slice(this.#path_prefix.length);
+		else return new Response(void 0, { status: 404 });
 		const hyperapi_request_base = {
 			method: http_method,
-			path: url.pathname.slice(this.path.length),
+			path: hyperapi_path,
 			url,
 			headers: request.headers,
 			ip: new IP(socket_address.address)
@@ -194,8 +196,8 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 		});
 	}
 	/** Stops the server. */
-	destroy() {
-		this.server.stop();
+	async destroy() {
+		await this.#server?.stop(true);
 		super.destroy();
 	}
 };

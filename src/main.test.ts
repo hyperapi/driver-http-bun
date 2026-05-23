@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 import '../test/setup.js';
-import { SECRET } from '../test/hyper-api/echo-sign.js';
+import { SECRET } from '../test/hyper-api/sign.post.js';
 import { generateHmacSha256 } from '../test/setup.js';
 
 describe('args', () => {
 	test('GET', async () => {
-		const response = await fetch('http://localhost:18001/api/echo?name=world', {
+		const response = await fetch('http://localhost:18001/echo?name=world', {
 			method: 'GET',
 			headers: {
 				'x-test-header': 'test-value',
@@ -14,30 +14,31 @@ describe('args', () => {
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Content-Type')).toBe('application/json');
+		expect(response.headers.get('Content-Length')).toBe('55');
 
 		const body = await response.json();
 		expect(body).toStrictEqual({
-			method: 'ALL',
 			message: 'Hello, world!',
 			header_value: 'test-value',
 		});
 	});
 
 	test('HEAD', async () => {
-		const response = await fetch('http://localhost:18001/api/echo?name=world', {
+		const response = await fetch('http://localhost:18001/echo?name=world', {
 			method: 'HEAD',
 		});
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Content-Type')).toBe('application/json');
+		expect(response.headers.get('Content-Length')).toBe('47');
 
-		const body = await response.text();
-		expect(body).toStrictEqual('');
+		const body = await response.arrayBuffer();
+		expect(body.byteLength).toStrictEqual(0);
 	});
 
 	describe('POST', () => {
 		test('JSON', async () => {
-			const response = await fetch('http://localhost:18001/api/echo', {
+			const response = await fetch('http://localhost:18001/echo', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -52,14 +53,12 @@ describe('args', () => {
 
 			const body = await response.json();
 			expect(body).toStrictEqual({
-				method: 'ALL',
 				message: 'Hello, foo!',
-				header_value: null,
 			});
 		});
 
 		test('form', async () => {
-			const response = await fetch('http://localhost:18001/api/echo', {
+			const response = await fetch('http://localhost:18001/echo', {
 				method: 'POST',
 				body: new URLSearchParams({
 					name: 'bar bar',
@@ -71,9 +70,7 @@ describe('args', () => {
 
 			const body = await response.json();
 			expect(body).toStrictEqual({
-				method: 'ALL',
 				message: 'Hello, bar bar!',
-				header_value: null,
 			});
 		});
 
@@ -81,7 +78,7 @@ describe('args', () => {
 			const form_data = new FormData();
 			form_data.append('file', new Blob(['baz'], { type: 'text/plain' }));
 
-			const response = await fetch('http://localhost:18002/api/echo-file', {
+			const response = await fetch('http://localhost:18002/multipart', {
 				method: 'POST',
 				body: form_data,
 			});
@@ -91,20 +88,13 @@ describe('args', () => {
 
 			const body = await response.json();
 			expect(body).toStrictEqual({
-				method: 'ALL',
 				message: 'Hello, baz!',
 			});
 		});
 
 		test('response', async () => {
-			const response = await fetch('http://localhost:18001/api/echo-response', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					name: 'foo',
-				}),
+			const response = await fetch('http://localhost:18001/response?name=foo', {
+				method: 'GET',
 			});
 
 			expect(response.status).toBe(200);
@@ -116,7 +106,7 @@ describe('args', () => {
 	});
 });
 
-describe('request', () => {
+describe('without body parsing', () => {
 	describe('POST', () => {
 		const request_body = JSON.stringify({
 			name: 'foo',
@@ -124,7 +114,7 @@ describe('request', () => {
 
 		test('echo with valid signature', async () => {
 			const sign = generateHmacSha256(SECRET, request_body);
-			const response = await fetch('http://localhost:18003/api/echo-sign', {
+			const response = await fetch('http://localhost:18003/sign', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -145,7 +135,7 @@ describe('request', () => {
 
 		test('echo with invalid signature', async () => {
 			const sign = 'intentionally-invalid-signature';
-			const response = await fetch('http://localhost:18003/api/echo-sign', {
+			const response = await fetch('http://localhost:18003/sign', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -166,7 +156,7 @@ describe('request', () => {
 });
 
 test('HyperAPIError with HTTP headers', async () => {
-	const response = await fetch('http://localhost:18001/api/error');
+	const response = await fetch('http://localhost:18001/error');
 
 	expect(response.status).toBe(429);
 	expect(response.headers.get('Content-Type')).toBe('application/json');
@@ -181,7 +171,7 @@ test('HyperAPIError with HTTP headers', async () => {
 
 describe('errors', () => {
 	test('unsupported HTTP method', async () => {
-		const response = await fetch('http://localhost:18001/api/echo?name=world', {
+		const response = await fetch('http://localhost:18001/echo?name=world', {
 			method: 'CONNECT', // need to be existing HTTP method, otherwise fetch will set it to GET
 		});
 
@@ -189,14 +179,14 @@ describe('errors', () => {
 	});
 
 	test('invalid path', async () => {
-		const response = await fetch('http://localhost:18001/echo');
+		const response = await fetch('http://localhost:18001/echoo');
 
 		expect(response.status).toBe(404);
 	});
 
 	describe('invalid body', () => {
 		test('malformed JSON', async () => {
-			const response = await fetch('http://localhost:18001/api/echo', {
+			const response = await fetch('http://localhost:18001/echo', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -218,7 +208,7 @@ describe('errors', () => {
 		});
 
 		test('JSON array', async () => {
-			const response = await fetch('http://localhost:18001/api/echo', {
+			const response = await fetch('http://localhost:18001/echo', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -245,7 +235,7 @@ describe('errors', () => {
 			const form_data = new FormData();
 			form_data.append('name', new Blob(['baz'], { type: 'text/plain' }));
 
-			const response = await fetch('http://localhost:18001/api/echo-file', {
+			const response = await fetch('http://localhost:18001/multipart', {
 				method: 'POST',
 				body: form_data,
 			});

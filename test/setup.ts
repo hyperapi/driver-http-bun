@@ -4,7 +4,7 @@ import type { HyperAPIRequest } from '@hyperapi/core/dev';
 import * as v from 'valibot';
 import { HyperAPIBunDriver } from '../src/main.js';
 
-const ROOT = new URL('hyper-api', import.meta.url).pathname;
+const ROOT = `${import.meta.dir}/hyper-api`;
 
 export const hyperApi = new HyperAPI(
 	new HyperAPIBunDriver({

@@ -72,22 +72,22 @@ export async function parseArguments(
 				: getMIME(type_header);
 
 		switch (type_mime) {
-			case 'application/json':
-				{
-					let args_json: unknown;
-					try {
-						args_json = await request.json();
-					} catch {
-						throw new HyperAPIBodyInvalidError();
-					}
-
-					if (isRecord(args_json) !== true) {
-						throw new HyperAPIBodyInvalidError('JSON body must be an object');
-					}
-
-					args = args_json;
+			case 'application/json': {
+				let args_json: unknown;
+				try {
+					args_json = await request.json();
+				} catch {
+					throw new HyperAPIBodyInvalidError();
 				}
+
+				if (isRecord(args_json) !== true) {
+					throw new HyperAPIBodyInvalidError('JSON body must be an object');
+				}
+
+				args = args_json;
+
 				break;
+			}
 
 			case 'multipart/form-data':
 				if (multipart_formdata_enabled !== true) {
@@ -100,6 +100,7 @@ export async function parseArguments(
 				} catch {
 					throw new HyperAPIInvalidParametersError();
 				}
+
 				break;
 
 			case 'application/x-www-form-urlencoded':
@@ -108,6 +109,7 @@ export async function parseArguments(
 				} catch {
 					throw new HyperAPIInvalidParametersError();
 				}
+
 				break;
 
 			default:

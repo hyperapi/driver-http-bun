@@ -8,7 +8,6 @@ export default hyperApi
 		const name = await request.args.file.text();
 
 		return {
-			method: 'ALL',
 			message: `Hello, ${name}!`,
 		};
 	});
