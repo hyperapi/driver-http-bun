@@ -1,7 +1,6 @@
 import { HyperAPIError } from '@hyperapi/core';
 import { HyperAPIDriver } from '@hyperapi/core/dev';
 import { IP } from '@kirick/ip';
-import type { Server } from 'bun';
 import type { HyperAPIBunRequest } from './request.js';
 import { isHttpMethodSupported, isResponseBodyRequired } from './utils/http.js';
 import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
@@ -20,7 +19,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	#path_prefix: string;
 	private multipart_formdata_enabled: boolean;
 	private parse_body: P;
-	#server: Server<unknown> | undefined;
+	#server: Bun.Server<unknown> | undefined;
 
 	/**
 	 * @param options -
@@ -50,7 +49,10 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 		}
 	}
 
-	async handler(request: Request, server: Server<unknown>): Promise<Response> {
+	async handler(
+		request: Request,
+		server: Bun.Server<unknown>,
+	): Promise<Response> {
 		try {
 			return await this.processRequest(request, server);
 		} catch (error) {
@@ -78,7 +80,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	 */
 	private async processRequest(
 		request: Request,
-		server: Server<unknown>,
+		server: Bun.Server<unknown>,
 	): Promise<Response> {
 		const socket_address = server.requestIP(request);
 		if (socket_address === null) {
@@ -132,7 +134,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 			} as HyperAPIBunRequest<P, RequestArgs>;
 		}
 
-		const hyperapi_response = await this.emitRequest(hyperapi_request);
+		const hyperapi_response = await this.fetch(hyperapi_request);
 
 		if (hyperapi_response instanceof HyperAPIError) {
 			throw hyperapi_response;

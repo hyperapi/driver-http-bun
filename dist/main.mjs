@@ -1,7 +1,6 @@
 import { HyperAPIError, HyperAPIInvalidParametersError } from "@hyperapi/core";
 import { HyperAPIDriver, isRecord } from "@hyperapi/core/dev";
 import { IP } from "@kirick/ip";
-
 //#region src/utils/http.ts
 /**
 * Checks if the response body is required for the given HTTP method.
@@ -19,7 +18,6 @@ function isHttpMethodSupported(http_method) {
 function isResponseBodyRequired(http_method) {
 	return http_method !== "HEAD" && http_method !== "OPTIONS";
 }
-
 //#endregion
 //#region src/utils/hyperapi-error.ts
 /**
@@ -40,7 +38,6 @@ function hyperApiErrorToResponse(error, add_body) {
 		headers
 	});
 }
-
 //#endregion
 //#region src/utils/parse.ts
 /**
@@ -115,7 +112,6 @@ async function parseArguments(request, url, multipart_formdata_enabled) {
 	}
 	return args;
 }
-
 //#endregion
 //#region src/main.ts
 var HyperAPIBunDriver = class extends HyperAPIDriver {
@@ -187,7 +183,7 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 			args: {},
 			request
 		};
-		const hyperapi_response = await this.emitRequest(hyperapi_request);
+		const hyperapi_response = await this.fetch(hyperapi_request);
 		if (hyperapi_response instanceof HyperAPIError) throw hyperapi_response;
 		if (hyperapi_response instanceof Response) return hyperapi_response;
 		return new Response(isResponseBodyRequired(http_method) ? JSON.stringify(hyperapi_response) : void 0, {
@@ -201,6 +197,5 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 		super.destroy();
 	}
 };
-
 //#endregion
 export { HyperAPIBunDriver };

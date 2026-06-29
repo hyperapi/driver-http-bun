@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import '../test/setup.js';
-import { SECRET } from '../test/hyper-api/sign.post.js';
+import { SECRET } from '../test/hyper-api/sign+post.js';
 import { generateHmacSha256 } from '../test/setup.js';
 
 describe('args', () => {

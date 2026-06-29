@@ -1,6 +1,5 @@
-import { BaseRecord, EmptyObject, HyperAPIDriver, HyperAPIRequest } from "@hyperapi/core/dev";
+import { EmptyObject, HyperAPIDriver, HyperAPIRequest, UnknownRecord } from "@hyperapi/core/dev";
 import { IP } from "@kirick/ip";
-import { Server } from "bun";
 
 //#region src/request.d.ts
 interface HyperAPIBunRequestBase {
@@ -8,13 +7,13 @@ interface HyperAPIBunRequestBase {
   headers: Headers;
   ip: IP;
 }
-interface HyperAPIBunRequestWithArgs<A extends BaseRecord = EmptyObject> extends HyperAPIRequest<A>, HyperAPIBunRequestBase {
+interface HyperAPIBunRequestWithArgs<A extends UnknownRecord = EmptyObject> extends HyperAPIRequest<A>, HyperAPIBunRequestBase {
   args: A;
 }
 interface HyperAPIBunRequestWithRequest extends HyperAPIRequest<EmptyObject>, HyperAPIBunRequestBase {
   request: Request;
 }
-type HyperAPIBunRequest<P extends boolean = true, A extends BaseRecord = EmptyObject> = P extends true ? HyperAPIBunRequestWithArgs<A> : HyperAPIBunRequestWithRequest;
+type HyperAPIBunRequest<P extends boolean = true, A extends UnknownRecord = EmptyObject> = P extends true ? HyperAPIBunRequestWithArgs<A> : HyperAPIBunRequestWithRequest;
 //#endregion
 //#region src/utils/parse.d.ts
 type RequestArgs = Record<string, unknown>;
@@ -43,7 +42,7 @@ declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver
     multipart_formdata_enabled,
     parse_body
   }: Config<P>);
-  handler(request: Request, server: Server<unknown>): Promise<Response>;
+  handler(request: Request, server: Bun.Server<unknown>): Promise<Response>;
   /**
   * Handles the HTTP request.
   * @param request - HTTP request.
@@ -52,7 +51,7 @@ declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver
   */
   private processRequest;
   /** Stops the server. */
-  destroy(): Promise<void>;
+  override destroy(): Promise<void>;
 }
 //#endregion
 export { HyperAPIBunDriver, type HyperAPIBunRequest, type HyperAPIBunRequestWithArgs, type HyperAPIBunRequestWithRequest };

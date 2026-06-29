@@ -1,7 +1,7 @@
 import type {
-	BaseRecord,
 	EmptyObject,
 	HyperAPIRequest,
+	UnknownRecord,
 } from '@hyperapi/core/dev';
 import type { IP } from '@kirick/ip';
 
@@ -11,8 +11,9 @@ interface HyperAPIBunRequestBase {
 	ip: IP;
 }
 
-export interface HyperAPIBunRequestWithArgs<A extends BaseRecord = EmptyObject>
-	extends HyperAPIRequest<A>,
+export interface HyperAPIBunRequestWithArgs<
+	A extends UnknownRecord = EmptyObject,
+> extends HyperAPIRequest<A>,
 		HyperAPIBunRequestBase {
 	args: A;
 }
@@ -25,7 +26,7 @@ export interface HyperAPIBunRequestWithRequest
 
 export type HyperAPIBunRequest<
 	P extends boolean = true,
-	A extends BaseRecord = EmptyObject,
+	A extends UnknownRecord = EmptyObject,
 > = P extends true
 	? HyperAPIBunRequestWithArgs<A>
 	: HyperAPIBunRequestWithRequest;
