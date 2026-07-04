@@ -18,13 +18,8 @@ export function hyperApiErrorToResponse(
 		);
 	}
 
-	const headers = new Headers();
+	const headers = error.httpHeaders ?? new Headers();
 	headers.set('Content-Type', 'application/json');
-	if (error.httpHeaders) {
-		for (const [header, value] of Object.entries(error.httpHeaders)) {
-			headers.set(header, value);
-		}
-	}
 
 	let body;
 	if (add_body) {

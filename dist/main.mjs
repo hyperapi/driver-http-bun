@@ -28,9 +28,8 @@ function isResponseBodyRequired(http_method) {
 */
 function hyperApiErrorToResponse(error, add_body) {
 	if (typeof error.httpStatus !== "number") console.warn(`No HTTP status code provided for error ${error.name}, using 500.`);
-	const headers = new Headers();
+	const headers = error.httpHeaders ?? new Headers();
 	headers.set("Content-Type", "application/json");
-	if (error.httpHeaders) for (const [header, value] of Object.entries(error.httpHeaders)) headers.set(header, value);
 	let body;
 	if (add_body) body = JSON.stringify(error.getResponse());
 	return new Response(body, {
