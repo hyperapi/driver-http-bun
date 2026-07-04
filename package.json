@@ -6,8 +6,6 @@
 		"access": "public"
 	},
 	"type": "module",
-	"main": "dist/main.mjs",
-	"types": "dist/main.d.mts",
 	"exports": {
 		".": {
 			"types": "./dist/main.d.mts",
@@ -18,7 +16,7 @@
 		"node": ">=21"
 	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#7df8a93e13aef72083aa5f92f563b1b89477a3a6",
+		"@hyperapi/core": "github:hyperapi/core#7c1fe4caf68b127a7bfa4f0e41d2e685f9c7cc16",
 		"@kirick/ip": "^0.2.1"
 	},
 	"devDependencies": {
