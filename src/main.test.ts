@@ -36,6 +36,24 @@ describe('args', () => {
 		expect(body.byteLength).toStrictEqual(0);
 	});
 
+	test('QUERY', async () => {
+		const response = await fetch('http://localhost:18001/echo', {
+			method: 'QUERY',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ name: 'world' }),
+		});
+
+		expect(response.status).toBe(200);
+
+		const body = await response.json();
+		expect(body).toStrictEqual({
+			message: 'Queried world!',
+			method: 'QUERY',
+		});
+	});
+
 	describe('POST', () => {
 		test('JSON', async () => {
 			const response = await fetch('http://localhost:18001/echo', {
@@ -176,6 +194,19 @@ describe('errors', () => {
 		});
 
 		expect(response.status).toBe(405);
+	});
+
+	test('QUERY without +query route', async () => {
+		const response = await fetch('http://localhost:18001/response', {
+			method: 'QUERY',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ name: 'foo' }),
+		});
+
+		expect(response.status).toBe(405);
+		expect(response.headers.get('Allow')).toBe('GET');
 	});
 
 	test('invalid path', async () => {

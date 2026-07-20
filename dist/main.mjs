@@ -8,7 +8,7 @@ import { IP } from "@kirick/ip";
 * @returns -
 */
 function isHttpMethodSupported(http_method) {
-	return http_method === "GET" || http_method === "POST" || http_method === "PUT" || http_method === "PATCH" || http_method === "DELETE" || http_method === "HEAD" || http_method === "OPTIONS";
+	return http_method === "GET" || http_method === "POST" || http_method === "PUT" || http_method === "PATCH" || http_method === "DELETE" || http_method === "HEAD" || http_method === "OPTIONS" || http_method === "QUERY";
 }
 /**
 * Checks if the response body is required for the given HTTP method.

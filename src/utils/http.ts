@@ -5,7 +5,8 @@ type HttpMethod =
 	| 'PATCH'
 	| 'DELETE'
 	| 'HEAD'
-	| 'OPTIONS';
+	| 'OPTIONS'
+	| 'QUERY';
 
 /**
  * Checks if the response body is required for the given HTTP method.
@@ -23,6 +24,7 @@ export function isHttpMethodSupported(
 		|| http_method === 'DELETE'
 		|| http_method === 'HEAD'
 		|| http_method === 'OPTIONS'
+		|| http_method === 'QUERY'
 	);
 }
 
