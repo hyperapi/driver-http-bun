@@ -52,13 +52,13 @@ class HyperAPIBodyUnknownError extends HyperAPIInvalidParametersError<{
  * Parses arguments from request.
  * @param  request - Request object.
  * @param  url - URL object.
- * @param  multipart_formdata_enabled - Whether to enable multipart/form-data parsing.
+ * @param  is_multipart_formdata_enabled - Whether to enable multipart/form-data parsing.
  * @returns - Arguments.
  */
 export async function parseArguments(
 	request: Request,
 	url: URL,
-	multipart_formdata_enabled: boolean,
+	is_multipart_formdata_enabled: boolean,
 ): Promise<RequestArgs> {
 	let args: RequestArgs = {};
 
@@ -90,7 +90,7 @@ export async function parseArguments(
 			}
 
 			case 'multipart/form-data':
-				if (multipart_formdata_enabled !== true) {
+				if (!is_multipart_formdata_enabled) {
 					throw new HyperAPIBodyUnknownError(type_mime);
 				}
 

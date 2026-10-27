@@ -3,31 +3,23 @@ import { HyperAPIError } from '@hyperapi/core';
 /**
  * Converts a HyperAPIError to a Response.
  * @param error - The error to convert.
- * @param add_body - Whether to add the response body.
+ * @param should_add_body - Whether to add the response body.
  * @returns -
  */
 export function hyperApiErrorToResponse(
 	// oxlint-disable-next-line typescript/no-explicit-any
 	error: HyperAPIError<any>,
-	add_body: boolean,
+	should_add_body: boolean,
 ): Response {
-	if (typeof error.httpStatus !== 'number') {
-		// oxlint-disable-next-line no-console
-		console.warn(
-			`No HTTP status code provided for error ${error.name}, using 500.`,
-		);
-	}
-
-	const headers = error.httpHeaders ?? new Headers();
+	// Copied, not mutated: httpHeaders belongs to the error, which may be reused.
+	const headers = new Headers(error.httpHeaders);
 	headers.set('Content-Type', 'application/json');
 
-	let body;
-	if (add_body) {
-		body = JSON.stringify(error.getResponse());
-	}
-
-	return new Response(body, {
-		status: error.httpStatus ?? 500,
-		headers,
-	});
+	return new Response(
+		should_add_body ? JSON.stringify(error.getResponse()) : undefined,
+		{
+			status: error.httpStatus,
+			headers,
+		},
+	);
 }

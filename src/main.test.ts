@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'bun:test';
+import { HyperAPI } from '@hyperapi/core';
+import { HyperAPIBunDriver } from './main.js';
 import '../test/setup.js';
 import { SECRET } from '../test/hyper-api/sign+post.js';
 import { generateHmacSha256 } from '../test/setup.js';
@@ -6,7 +8,6 @@ import { generateHmacSha256 } from '../test/setup.js';
 describe('args', () => {
 	test('GET', async () => {
 		const response = await fetch('http://localhost:18001/echo?name=world', {
-			method: 'GET',
 			headers: {
 				'x-test-header': 'test-value',
 			},
@@ -93,9 +94,7 @@ describe('args', () => {
 		});
 
 		test('response', async () => {
-			const response = await fetch('http://localhost:18001/response?name=foo', {
-				method: 'GET',
-			});
+			const response = await fetch('http://localhost:18001/response?name=foo');
 
 			expect(response.status).toBe(200);
 			expect(response.headers.get('Content-Type')).toBe('text/plain');
@@ -253,4 +252,22 @@ describe('errors', () => {
 			});
 		});
 	});
+});
+
+test('destroy', async () => {
+	// Its own port: the shared servers in test/setup.ts outlive every test.
+	const hyperApi = new HyperAPI(
+		new HyperAPIBunDriver({ port: 18004 }),
+		`${import.meta.dir}/../test/hyper-api`,
+	);
+
+	const response = await fetch('http://localhost:18004/echo?name=world');
+	expect(response.status).toBe(200);
+	await response.json();
+
+	await hyperApi.destroy();
+
+	await expect(
+		fetch('http://localhost:18004/echo?name=world'),
+	).rejects.toThrow();
 });

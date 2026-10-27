@@ -2,6 +2,7 @@ import { HyperAPIError } from '@hyperapi/core';
 import { HyperAPIDriver } from '@hyperapi/core/dev';
 import { IP } from '@kirick/ip';
 import type { HyperAPIBunRequest } from './request.js';
+import type { HyperAPIBunResponse } from './response.js';
 import { isHttpMethodSupported, isResponseBodyRequired } from './utils/http.js';
 import { hyperApiErrorToResponse } from './utils/hyperapi-error.js';
 import { parseArguments, type RequestArgs } from './utils/parse.js';
@@ -14,7 +15,8 @@ interface Config<P extends boolean = true> {
 }
 
 export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
-	HyperAPIBunRequest<P, RequestArgs>
+	HyperAPIBunRequest<P, RequestArgs>,
+	HyperAPIBunResponse
 > {
 	#path_prefix: string;
 	private multipart_formdata_enabled: boolean;
@@ -24,7 +26,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	/**
 	 * @param options -
 	 * @param options.port - HTTP server port. If not provided, server will not be started, you should start it manually.
-	 * @param options.path - Path to serve. Default: `/api/`.
+	 * @param options.path - Path to serve. Default: `/`.
 	 * @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
 	 * @param options.parse_body - If `true`, server would parse requests. Default: `true`.
 	 */
@@ -42,11 +44,23 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 
 		if (port !== undefined) {
 			this.#server = Bun.serve({
+				// oxlint-disable-next-line node/no-process-env
 				development: process.env.NODE_ENV !== 'production',
 				port,
 				fetch: this.handler.bind(this),
 			});
 		}
+	}
+
+	/**
+	 * Accepts anything HTTP can carry: this transport adds a raw `Response` to
+	 * the core floor.
+	 * @param response - The value a module returned.
+	 * @returns -
+	 */
+	// oxlint-disable-next-line class-methods-use-this
+	override isValidResponse(response: unknown): response is HyperAPIBunResponse {
+		return response instanceof Response || super.isValidResponse(response);
 	}
 
 	async handler(
@@ -159,9 +173,8 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 
 	/** Stops the server. */
 	override async destroy(): Promise<void> {
-		await this.#server?.stop(true);
-
-		super.destroy();
+		await this.#server?.stop();
+		await super.destroy();
 	}
 }
 
@@ -170,3 +183,4 @@ export type {
 	HyperAPIBunRequestWithArgs,
 	HyperAPIBunRequestWithRequest,
 } from './request.js';
+export type { HyperAPIBunResponse } from './response.js';

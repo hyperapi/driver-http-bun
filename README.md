@@ -31,7 +31,7 @@ import { HyperAPIBunDriver } from '@hyperapi/driver-bun';
 // Create a driver instance
 const driver = new HyperAPIBunDriver({
   port: 3000,                        // HTTP server port
-  path: '/api/',                     // Base path for API endpoints (default: '/api/')
+  path: '/api/',                     // Base path for API endpoints (default: '/')
   multipart_formdata_enabled: false  // Enable multipart/form-data parsing (default: false)
 });
 

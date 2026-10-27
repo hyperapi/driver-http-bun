@@ -34,9 +34,9 @@ function validateSignature() {
 		const text = decoder.decode(buffer);
 		const sign = generateHmacSha256(SECRET, text);
 		const expected_sign = request.headers.get('X-Signature');
-		const valid = expected_sign === sign;
+		const is_valid = expected_sign === sign;
 
-		if (!valid) {
+		if (!is_valid) {
 			throw new HyperAPIInvalidSignature();
 		}
 

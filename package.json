@@ -6,6 +6,9 @@
 		"access": "public"
 	},
 	"type": "module",
+	"files": [
+		"dist/"
+	],
 	"exports": {
 		".": {
 			"types": "./dist/main.d.mts",
@@ -16,28 +19,27 @@
 		"node": ">=21"
 	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#61a0e728bd0e5a19928b241661124533bfdb8a12",
+		"@hyperapi/core": "github:hyperapi/core#7e59428a9a8954d81467ec4f2eaf7ce32a52daea",
 		"@kirick/ip": "^0.2.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.10",
-		"@kirick/lint": "0.3.3",
+		"@biomejs/biome": "2.5.4",
+		"@kirick/lint": "0.4.2",
 		"@types/bun": "1.3.14",
-		"eslint": "10.2.0",
-		"oxlint": "1.58.0",
+		"eslint": "10.7.0",
+		"oxlint": "1.74.0",
 		"publint": "0.3.21",
 		"tsdown": "0.22.3",
-		"typescript": "6.0.2",
+		"typescript": "6.0.3",
 		"unplugin-unused": "0.5.7",
-		"valibot": "1.4.2"
+		"valibot": "1.5.0"
 	},
 	"_devpack": {
 		"@hyperapi/core": "../core"
 	},
 	"scripts": {
-		"build": "tsdown src/main.ts --clean --tsconfig tsconfig.main.json --publint --unused --dts --format esm",
-		"check": "bun run lint && bun run build && bun run test",
-		"lint": "biome format && oxlint && eslint . && tsc -b",
+		"build": "tsdown src/main.ts --clean --publint --unused --dts --format esm",
+		"check": "lint && bun run build && bun run test",
 		"test": "bun test --coverage"
 	},
 	"repository": {

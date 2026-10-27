@@ -2,13 +2,22 @@ import { HyperAPIError, HyperAPIInvalidParametersError } from "@hyperapi/core";
 import { HyperAPIDriver, isRecord } from "@hyperapi/core/dev";
 import { IP } from "@kirick/ip";
 //#region src/utils/http.ts
+const HTTP_METHODS = [
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
+	"HEAD",
+	"OPTIONS"
+];
 /**
-* Checks if the response body is required for the given HTTP method.
+* Checks if the given HTTP method is one this driver serves.
 * @param http_method The HTTP method to check.
 * @returns -
 */
 function isHttpMethodSupported(http_method) {
-	return http_method === "GET" || http_method === "POST" || http_method === "PUT" || http_method === "PATCH" || http_method === "DELETE" || http_method === "HEAD" || http_method === "OPTIONS";
+	return HTTP_METHODS.includes(http_method);
 }
 /**
 * Checks if the response body is required for the given HTTP method.
@@ -23,17 +32,14 @@ function isResponseBodyRequired(http_method) {
 /**
 * Converts a HyperAPIError to a Response.
 * @param error - The error to convert.
-* @param add_body - Whether to add the response body.
+* @param should_add_body - Whether to add the response body.
 * @returns -
 */
-function hyperApiErrorToResponse(error, add_body) {
-	if (typeof error.httpStatus !== "number") console.warn(`No HTTP status code provided for error ${error.name}, using 500.`);
-	const headers = error.httpHeaders ?? new Headers();
+function hyperApiErrorToResponse(error, should_add_body) {
+	const headers = new Headers(error.httpHeaders);
 	headers.set("Content-Type", "application/json");
-	let body;
-	if (add_body) body = JSON.stringify(error.getResponse());
-	return new Response(body, {
-		status: error.httpStatus ?? 500,
+	return new Response(should_add_body ? JSON.stringify(error.getResponse()) : void 0, {
+		status: error.httpStatus,
 		headers
 	});
 }
@@ -69,10 +75,10 @@ var HyperAPIBodyUnknownError = class extends HyperAPIInvalidParametersError {
 * Parses arguments from request.
 * @param  request - Request object.
 * @param  url - URL object.
-* @param  multipart_formdata_enabled - Whether to enable multipart/form-data parsing.
+* @param  is_multipart_formdata_enabled - Whether to enable multipart/form-data parsing.
 * @returns - Arguments.
 */
-async function parseArguments(request, url, multipart_formdata_enabled) {
+async function parseArguments(request, url, is_multipart_formdata_enabled) {
 	let args = {};
 	if (request.method === "GET" || request.method === "HEAD") args = Object.fromEntries(url.searchParams.entries());
 	else if (request.body) {
@@ -91,7 +97,7 @@ async function parseArguments(request, url, multipart_formdata_enabled) {
 				break;
 			}
 			case "multipart/form-data":
-				if (multipart_formdata_enabled !== true) throw new HyperAPIBodyUnknownError(type_mime);
+				if (!is_multipart_formdata_enabled) throw new HyperAPIBodyUnknownError(type_mime);
 				try {
 					const formdata = await request.formData();
 					args = Object.fromEntries(formdata.entries());
@@ -121,7 +127,7 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 	/**
 	* @param options -
 	* @param options.port - HTTP server port. If not provided, server will not be started, you should start it manually.
-	* @param options.path - Path to serve. Default: `/api/`.
+	* @param options.path - Path to serve. Default: `/`.
 	* @param options.multipart_formdata_enabled - If `true`, server would parse `multipart/form-data` requests. Default: `false`.
 	* @param options.parse_body - If `true`, server would parse requests. Default: `true`.
 	*/
@@ -135,6 +141,15 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 			port,
 			fetch: this.handler.bind(this)
 		});
+	}
+	/**
+	* Accepts anything HTTP can carry: this transport adds a raw `Response` to
+	* the core floor.
+	* @param response - The value a module returned.
+	* @returns -
+	*/
+	isValidResponse(response) {
+		return response instanceof Response || super.isValidResponse(response);
 	}
 	async handler(request, server) {
 		try {
@@ -192,8 +207,8 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 	}
 	/** Stops the server. */
 	async destroy() {
-		await this.#server?.stop(true);
-		super.destroy();
+		await this.#server?.stop();
+		await super.destroy();
 	}
 };
 //#endregion
