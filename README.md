@@ -1,6 +1,7 @@
 # HyperAPI HTTP Driver for Bun
 
-[![npm version](https://img.shields.io/npm/v/@hyperapi/driver-http-bun.svg)](https://www.npmjs.com/package/@hyperapi/driver-http-bun)
+[![npm version](https://img.shields.io/npm/v/@hyperapi/driver-bun.svg)](https://www.npmjs.com/package/@hyperapi/driver-bun)
+[![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@hyperapi/driver-bun?style=shieldsio&label=npmx.dev)](https://npmx.dev/package/@hyperapi/driver-bun)
 [![license](https://img.shields.io/npm/l/@hyperapi/driver-bun.svg?color=blue)](https://github.com/hyperapi/driver-http-bun/blob/main/LICENSE)
 
 HyperAPI HTTP driver for [Bun](https://bun.sh).
