@@ -19,7 +19,7 @@
 		"node": ">=21"
 	},
 	"peerDependencies": {
-		"@hyperapi/core": "github:hyperapi/core#7e59428a9a8954d81467ec4f2eaf7ce32a52daea",
+		"@hyperapi/core": "github:hyperapi/core#daac5df164cba7ce5f2638afef5dc13659d4f1c0",
 		"@kirick/ip": "^0.2.1"
 	},
 	"devDependencies": {
@@ -39,7 +39,7 @@
 	},
 	"scripts": {
 		"build": "tsdown src/main.ts --clean --publint --unused --dts --format esm",
-		"check": "lint && bun run build && bun run test",
+		"check": "lint && bun run test && bun run build",
 		"test": "bun test --coverage"
 	},
 	"repository": {
