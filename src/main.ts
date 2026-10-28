@@ -19,9 +19,9 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 	HyperAPIBunResponse
 > {
 	#path_prefix: string;
-	private multipart_formdata_enabled: boolean;
-	private parse_body: P;
-	#server: Bun.Server<unknown> | undefined;
+	#multipart_formdata_enabled: boolean;
+	#parse_body: P;
+	#server: Bun.Server<unknown>;
 
 	/**
 	 * @param options -
@@ -39,17 +39,15 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 		super();
 
 		this.#path_prefix = path.replace(/\/$/u, '');
-		this.multipart_formdata_enabled = multipart_formdata_enabled;
-		this.parse_body = parse_body;
+		this.#multipart_formdata_enabled = multipart_formdata_enabled;
+		this.#parse_body = parse_body;
 
-		if (port !== undefined) {
-			this.#server = Bun.serve({
-				// oxlint-disable-next-line node/no-process-env
-				development: process.env.NODE_ENV !== 'production',
-				port,
-				fetch: this.handler.bind(this),
-			});
-		}
+		this.#server = Bun.serve({
+			// oxlint-disable-next-line node/no-process-env
+			development: process.env.NODE_ENV !== 'production',
+			port,
+			fetch: this.handler.bind(this),
+		});
 	}
 
 	/**
@@ -129,11 +127,11 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 		};
 
 		let hyperapi_request: HyperAPIBunRequest<P, RequestArgs>;
-		if (this.parse_body) {
+		if (this.#parse_body) {
 			const hyperapi_args = await parseArguments(
 				request,
 				url as URL,
-				this.multipart_formdata_enabled,
+				this.#multipart_formdata_enabled,
 			);
 
 			hyperapi_request = {
@@ -173,7 +171,7 @@ export class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<
 
 	/** Stops the server. */
 	override async destroy(): Promise<void> {
-		await this.#server?.stop();
+		await this.#server.stop();
 		await super.destroy();
 	}
 }

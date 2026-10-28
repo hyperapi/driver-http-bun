@@ -31,8 +31,6 @@ interface Config<P extends boolean = true> {
 }
 declare class HyperAPIBunDriver<P extends boolean = true> extends HyperAPIDriver<HyperAPIBunRequest<P, RequestArgs>, HyperAPIBunResponse> {
   #private;
-  private multipart_formdata_enabled;
-  private parse_body;
   /**
   * @param options -
   * @param options.port - HTTP server port. If not provided, server will not be started, you should start it manually.

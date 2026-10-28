@@ -9,5 +9,6 @@ export default hyperApi
 
 		return {
 			message: `Hello, ${name}!`,
+			filename: request.args.file.name,
 		};
 	});

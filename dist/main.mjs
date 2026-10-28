@@ -121,8 +121,8 @@ async function parseArguments(request, url, is_multipart_formdata_enabled) {
 //#region src/main.ts
 var HyperAPIBunDriver = class extends HyperAPIDriver {
 	#path_prefix;
-	multipart_formdata_enabled;
-	parse_body;
+	#multipart_formdata_enabled;
+	#parse_body;
 	#server;
 	/**
 	* @param options -
@@ -134,9 +134,9 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 	constructor({ port, path = "/", multipart_formdata_enabled = false, parse_body = true }) {
 		super();
 		this.#path_prefix = path.replace(/\/$/u, "");
-		this.multipart_formdata_enabled = multipart_formdata_enabled;
-		this.parse_body = parse_body;
-		if (port !== void 0) this.#server = Bun.serve({
+		this.#multipart_formdata_enabled = multipart_formdata_enabled;
+		this.#parse_body = parse_body;
+		this.#server = Bun.serve({
 			development: process.env.NODE_ENV !== "production",
 			port,
 			fetch: this.handler.bind(this)
@@ -186,8 +186,8 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 			ip: new IP(socket_address.address)
 		};
 		let hyperapi_request;
-		if (this.parse_body) {
-			const hyperapi_args = await parseArguments(request, url, this.multipart_formdata_enabled);
+		if (this.#parse_body) {
+			const hyperapi_args = await parseArguments(request, url, this.#multipart_formdata_enabled);
 			hyperapi_request = {
 				...hyperapi_request_base,
 				args: hyperapi_args
@@ -207,7 +207,7 @@ var HyperAPIBunDriver = class extends HyperAPIDriver {
 	}
 	/** Stops the server. */
 	async destroy() {
-		await this.#server?.stop();
+		await this.#server.stop();
 		await super.destroy();
 	}
 };
